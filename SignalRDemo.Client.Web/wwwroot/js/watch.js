@@ -19,7 +19,7 @@ function successToConnect() {
 }
 
 function failureToConnect() {
-    console.log("Unfortunatlly couldn't connect to hub");
+    console.log("Unfortunately couldn't connect to hub");
 }
 
 connection.start()
