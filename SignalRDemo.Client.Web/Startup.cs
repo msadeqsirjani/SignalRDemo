@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SignalRDemo.Client.Web.Hubs;
+using SignalRDemo.Client.Web.Services;
 
 namespace SignalRDemo.Client.Web
 {
@@ -21,8 +22,10 @@ namespace SignalRDemo.Client.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpClient<IRandomUserService, RandomUserService>();
             services.AddRazorPages();
             services.AddSignalR();
+            services.AddTransient<IRandomUserService, RandomUserService>();
             services.AddLogging(logging =>
             {
                 logging.AddProvider(new Logger.ConsoleLoggerProvider());
@@ -59,6 +62,10 @@ namespace SignalRDemo.Client.Web
                     options.Transports = HttpTransportType.WebSockets | HttpTransportType.ServerSentEvents;
                 });
                 endpoints.MapHub<AccountHub>("hubs/account", options =>
+                {
+                    options.Transports = HttpTransportType.WebSockets | HttpTransportType.ServerSentEvents;
+                });
+                endpoints.MapHub<UserHub>("hubs/user", options =>
                 {
                     options.Transports = HttpTransportType.WebSockets | HttpTransportType.ServerSentEvents;
                 });
