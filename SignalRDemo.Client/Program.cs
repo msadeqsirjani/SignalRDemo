@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
 using SignalRDemo.Client.Logger;
+using SignalRDemo.Client.RetryPolicy;
 using System;
 using System.Threading.Tasks;
 
@@ -16,7 +17,7 @@ namespace SignalRDemo.Client
                 var connection = new HubConnectionBuilder()
                     .WithUrl(new Uri("http://localhost:5000/hubs/watch"),
                         HttpTransportType.WebSockets | HttpTransportType.ServerSentEvents)
-                    .WithAutomaticReconnect(new[] { 1.Minutes(), 2.Minutes(), 5.Minutes() })
+                    .WithAutomaticReconnect(new CactusRetryPolicy())
                     .ConfigureLogging(logging => { logging.AddProvider(new ConsoleLoggerProvider()); })
                     .Build();
 

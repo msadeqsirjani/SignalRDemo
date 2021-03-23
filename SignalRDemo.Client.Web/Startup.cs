@@ -22,10 +22,12 @@ namespace SignalRDemo.Client.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddMvc();
             services.AddHttpClient<IRandomUserService, RandomUserService>();
             services.AddRazorPages();
             services.AddSignalR();
             services.AddTransient<IRandomUserService, RandomUserService>();
+            services.AddSingleton<IVoteManager, VoteManager>();
             services.AddLogging(logging =>
             {
                 logging.AddProvider(new Logger.ConsoleLoggerProvider());
@@ -53,6 +55,7 @@ namespace SignalRDemo.Client.Web
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
+                endpoints.MapControllers();
                 endpoints.MapHub<WatchHub>("hubs/watch", options =>
                 {
                     options.Transports = HttpTransportType.WebSockets | HttpTransportType.ServerSentEvents;
@@ -66,6 +69,10 @@ namespace SignalRDemo.Client.Web
                     options.Transports = HttpTransportType.WebSockets | HttpTransportType.ServerSentEvents;
                 });
                 endpoints.MapHub<UserHub>("hubs/user", options =>
+                {
+                    options.Transports = HttpTransportType.WebSockets | HttpTransportType.ServerSentEvents;
+                });
+                endpoints.MapHub<VoteHub>("hubs/vote", options =>
                 {
                     options.Transports = HttpTransportType.WebSockets | HttpTransportType.ServerSentEvents;
                 });
