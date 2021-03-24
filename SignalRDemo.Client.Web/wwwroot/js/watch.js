@@ -5,17 +5,12 @@ var connection = new signalR.HubConnectionBuilder()
     .build();
 
 connection.on("View", function (viewer) {
-    document.getElementById("viewer").innerText = viewer;
+    console.log(viewer);
+    document.getElementById("viewer").innerText = viewer.toString();
 });
-
-function notify() {
-    connection.send("Watch");
-}
 
 function successToConnect() {
     console.log("Successfully connected to hub");
-
-    notify();
 }
 
 function failureToConnect() {

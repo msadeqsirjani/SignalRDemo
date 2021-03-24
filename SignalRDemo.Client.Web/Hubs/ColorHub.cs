@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace SignalRDemo.Client.Web.Hubs
 {
-    public class ColorHub : Hub
+    public class ColorHub : Hub<IColorHubClient>
     {
         public async Task JoinGroup(string groupName)
         {
@@ -17,7 +17,12 @@ namespace SignalRDemo.Client.Web.Hubs
 
         public async Task TriggerGroup(string groupName)
         {
-            await Clients.Group(groupName).SendAsync("TriggerColor", groupName);
+            await Clients.Group(groupName).TriggerColor(groupName);
         }
+    }
+
+    public interface IColorHubClient
+    {
+        Task TriggerColor(string groupName);
     }
 }

@@ -23,11 +23,17 @@ namespace SignalRDemo.Client.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-            services.AddHttpClient<IRandomUserService, RandomUserService>();
+
             services.AddRazorPages();
-            services.AddSignalR();
+
+            services.AddSignalR()
+                .AddMessagePackProtocol();
+
+            services.AddHttpClient<IRandomUserService, RandomUserService>();
+
             services.AddTransient<IRandomUserService, RandomUserService>();
             services.AddSingleton<IVoteManager, VoteManager>();
+
             services.AddLogging(logging =>
             {
                 logging.AddProvider(new Logger.ConsoleLoggerProvider());

@@ -21,11 +21,32 @@ namespace SignalRDemo.Client
                     .ConfigureLogging(logging => { logging.AddProvider(new ConsoleLoggerProvider()); })
                     .Build();
 
+                connection.Reconnecting += exception =>
+                {
+                    Console.BackgroundColor = ConsoleColor.Magenta;
+
+                    return Task.CompletedTask;
+                };
+
+                connection.Reconnected += s =>
+                {
+                    Console.BackgroundColor = ConsoleColor.Black;
+
+                    return Task.CompletedTask;
+                };
+
+                connection.Closed += exception =>
+                {
+                    Console.BackgroundColor = ConsoleColor.Cyan;
+
+                    return Task.CompletedTask;
+                };
+
                 connection.StartAsync().Wait();
 
                 SuccessToConnectToHub();
 
-                await NotifyMemberName(connection);
+                await NotifyWatchingMembers(connection);
             }
             catch
             {
@@ -37,60 +58,18 @@ namespace SignalRDemo.Client
 
         private static async Task NotifyWatchingMembers(HubConnection connection)
         {
+            ListenToUpdateWatchingMembers(connection);
+
             while (true)
             {
                 await CallNotifyWatchingMembers(connection);
-
-                Console.WriteLine("Do you want to see the watching members? <Y,N>");
-
-                var canContinue = Console.ReadLine();
-
-                if (!canContinue!.ToUpper().Equals("Y"))
-                    break;
-
-                ListenToUpdateWatchingMembers(connection);
             }
         }
-
-        private static async Task NotifyMemberName(HubConnection connection)
-        {
-            while (true)
-            {
-                Console.WriteLine("Continue? <Y,N>");
-
-                var canContinue = Console.ReadLine();
-
-                if (!canContinue!.ToUpper().Equals("Y"))
-                    break;
-
-                Console.WriteLine("Introduce yourself?");
-
-                Console.Write("Forename: ");
-                var forename = Console.ReadLine();
-
-                Console.Write("Surname: ");
-                var surname = Console.ReadLine();
-
-
-                await CallNotifyMemberName(connection, forename, surname);
-
-                ListenToIntroduceHimself(connection);
-            }
-        }
-
         private static void ListenToUpdateWatchingMembers(HubConnection connection) =>
             connection.On<int>(HubEventHandlerConstant.WatchHubClientUpdate, Console.WriteLine);
-
-        private static void ListenToIntroduceHimself(HubConnection connection) =>
-            connection.On<string>(HubEventHandlerConstant.AccountHubClientIntroduce, Console.WriteLine);
-
         private static async Task CallNotifyWatchingMembers(HubConnection connection) =>
             await connection.InvokeAsync(HubEventHandlerConstant.WatchHubServerWatch);
-
-        private static async Task CallNotifyMemberName(HubConnection connection, string forename, string surname) =>
-            await connection.InvokeAsync(HubEventHandlerConstant.AccountHubServerJoinUser, forename, surname);
-
-        private static void SuccessToConnectToHub() => Console.WriteLine("Successfully connnect to hub");
-        private static void FailureToConnectToHub() => Console.WriteLine("Unforetunalty disconnect from hub");
+        private static void SuccessToConnectToHub() => Console.WriteLine("Successfully connect to hub");
+        private static void FailureToConnectToHub() => Console.WriteLine("Unfortunately disconnect from hub");
     }
 }

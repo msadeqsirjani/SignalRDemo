@@ -16,8 +16,8 @@ btnGetOne.addEventListener("click", () => { clear(); connection.invoke("GetUsers
 btnGetTen.addEventListener("click", () => { clear(); connection.invoke("GetUsers", 10).then(receiveUsers); });
 btnGetOneThousand.addEventListener("click", () => { clear(); connection.invoke("GetUsers", 1000).then(receiveUsers); });
 
-var connection = new signalR.HubConnectionBuilder()
-    .configureLogging(signalR.LogLevel.Trace)
+const connection = new signalR.HubConnectionBuilder()
+    .withHubProtocol(new signalR.protocols.msgpack.MessagePackHubProtocol())
     .withUrl("/hubs/user")
     .build();
 
