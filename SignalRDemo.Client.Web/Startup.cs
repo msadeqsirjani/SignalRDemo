@@ -5,7 +5,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using SignalRDemo.Client.Web.HostedService;
 using SignalRDemo.Client.Web.Hubs;
+using SignalRDemo.Client.Web.Models;
 using SignalRDemo.Client.Web.Services;
 
 namespace SignalRDemo.Client.Web
@@ -22,12 +24,23 @@ namespace SignalRDemo.Client.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var redisCacheOption = new RedisCacheOption();
+
+            Configuration.GetSection("RedisCache").Bind(redisCacheOption);
+
             services.AddMvc();
 
             services.AddRazorPages();
 
             services.AddSignalR()
-                .AddMessagePackProtocol();
+                .AddMessagePackProtocol()
+                .AddStackExchangeRedis(redisCacheOption.Url, configure =>
+                {
+                    configure.Configuration.ChannelPrefix = redisCacheOption.ChannelPrefix;
+                    configure.Configuration.DefaultDatabase = redisCacheOption.DefaultDatabase;
+                });
+
+            services.AddHostedService<TimeHostedService>();
 
             services.AddHttpClient<IRandomUserService, RandomUserService>();
 
@@ -79,6 +92,14 @@ namespace SignalRDemo.Client.Web
                     options.Transports = HttpTransportType.WebSockets | HttpTransportType.ServerSentEvents;
                 });
                 endpoints.MapHub<VoteHub>("hubs/vote", options =>
+                {
+                    options.Transports = HttpTransportType.WebSockets | HttpTransportType.ServerSentEvents;
+                });
+                endpoints.MapHub<BackgroundHub>("hubs/background", options =>
+                {
+                    options.Transports = HttpTransportType.WebSockets | HttpTransportType.ServerSentEvents;
+                });
+                endpoints.MapHub<TimeHub>("hubs/time", options =>
                 {
                     options.Transports = HttpTransportType.WebSockets | HttpTransportType.ServerSentEvents;
                 });
